@@ -12,16 +12,22 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from server.security import add_security_middleware
+
 app = FastAPI(title="Project Server - Multi Platform", version="2.0")
 
-# Enable CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Attach security middleware (CORS, rate limiter, security headers)
+# Configure via environment variables: ALLOWED_ORIGINS (comma-separated), RATE_LIMIT_MAX_REQUESTS, RATE_LIMIT_WINDOW_SECONDS
+allowed = os.getenv("ALLOWED_ORIGINS", "*")
+if allowed.strip() == "*":
+    origins = ["*"]
+else:
+    origins = [o.strip() for o in allowed.split(",") if o.strip()]
+
+max_requests = int(os.getenv("RATE_LIMIT_MAX_REQUESTS", "200"))
+window_seconds = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "60"))
+
+add_security_middleware(app, allow_origins=origins, max_requests=max_requests, window_seconds=window_seconds)
 
 # Initialize Telegram Bot
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8505712679:AAGIkuamaV2WFH-XUBjtcB4y8-6zP9kYHXc")
