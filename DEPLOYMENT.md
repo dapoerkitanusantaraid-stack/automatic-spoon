@@ -483,6 +483,67 @@ docker-compose logs -f api
 
 # Test API
 curl https://yourdomain.com/health
+
+### GitHub Actions / Secrets
+
+If you need CI/CD to access `TELEGRAM_TOKEN` or other secrets, add them as repository secrets:
+
+1. Go to your repository on GitHub → `Settings` → `Secrets and variables` → `Actions`
+2. Click `New repository secret`
+3. Name: `TELEGRAM_BOT_TOKEN`, Value: `<your-telegram-token>`
+4. Add other secrets: `TWILIO_AUTH_TOKEN`, `ENCRYPTION_PASSWORD`, `DATABASE_URL`, `SENTRY_DSN`, etc.
+
+Note: the `gh` CLI may fail to set secrets if your token lacks the `repo` & `admin:repo_hook` scopes — use the web UI if `gh` returns HTTP 403.
+
+### Railway Deployment Quick Steps
+
+1. On Railway.app create a new project → `Deploy from GitHub` → select this repository.
+2. Railway will detect `railway.json` and Dockerfile. In project settings add environment variables listed in the `.env` section above (use Railway Variables UI).
+3. Set `TELEGRAM_BOT_TOKEN`, `ENCRYPTION_PASSWORD`, `DATABASE_URL` and any API keys as Railway environment variables (Production variables).
+4. Deploy; monitor build logs in Railway dashboard and check `/docs` endpoint after deployment.
+
+### Environment Variables Checklist (copy to Railway / Hosting UI)
+- `TELEGRAM_BOT_TOKEN` — Telegram Bot token (required for bot features)
+- `TELEGRAM_WEBHOOK_URL` — https://yourdomain.com/telegram/webhook
+- `DATABASE_URL` — production DB URL (Postgres recommended)
+- `ENCRYPTION_PASSWORD` — password used to encrypt backups
+- `ENCRYPTION_SALT` — hex salt used for key derivation
+- `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_NUMBER` — WhatsApp via Twilio
+- `INSTAGRAM_USERNAME`, `INSTAGRAM_PASSWORD` — Instagram automation (optional)
+- `FACEBOOK_ACCESS_TOKEN`, `FACEBOOK_PAGE_ID` — Facebook Graph API tokens (optional)
+- `SENTRY_DSN` — error monitoring (optional)
+
+### Verify Bot Webhooks
+
+1. After deployment, set Telegram webhook (replace placeholders):
+
+```bash
+curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook" \
+  -d "url=${TELEGRAM_WEBHOOK_URL}" \
+  -d "allowed_updates=['message','callback_query']"
+```
+
+2. Verify webhook status:
+
+```bash
+curl "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getWebhookInfo"
+```
+
+3. For Twilio/WhatsApp, configure your Twilio webhook URL to point to `https://yourdomain.com/whatsapp/webhook` in the Twilio Console.
+
+4. Use `ngrok` for local dev webhook testing:
+
+```bash
+ngrok http 8000
+# set TELEGRAM_WEBHOOK_URL to the ngrok URL + /telegram/webhook
+```
+
+### Troubleshooting webhooks
+
+- If messages aren't delivered, check logs: `docker-compose logs -f api`
+- Ensure `TELEGRAM_BOT_TOKEN` value is correct and not expired
+- Verify domain has valid SSL certificate (Telegram requires HTTPS)
+
 ```
 
 ### Health Check
