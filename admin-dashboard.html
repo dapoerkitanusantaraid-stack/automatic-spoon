@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Project Server</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2em;
+        }
+
+        .header p {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .logout-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        .stat-card .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .stat-card .label {
+            color: #999;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            font-weight: bold;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: #f8f9ff;
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-btn:hover {
+            background: #f8f9ff;
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-box button {
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .search-box button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table thead {
+            background: #f8f9ff;
+            color: #667eea;
+        }
+
+        table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 2px solid #eee;
+        }
+
+        table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+
+        table tr:hover {
+            background: #f8f9ff;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .badge-telegram {
+            background: #0088cc;
+            color: white;
+        }
+
+        .badge-whatsapp {
+            background: #25d366;
+            color: white;
+        }
+
+        .badge-instagram {
+            background: #e4405f;
+            color: white;
+        }
+
+        .badge-web {
+            background: #667eea;
+            color: white;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-right: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn.view {
+            background: #4ecdc4;
+            color: white;
+        }
+
+        .action-btn.view:hover {
+            background: #44a89f;
+        }
+
+        .action-btn.delete {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .action-btn.delete:hover {
+            background: #ff5252;
+        }
+
+        .chart-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+        }
+
+        .char-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+            height: 200px;
+            margin: 20px 0;
+        }
+
+        .bar {
+            flex: 1;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 5px 5px 0 0;
+            position: relative;
+            min-height: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            padding-bottom: 10px;
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 25px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-close {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .customer-detail-item {
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8f9ff;
+            border-radius: 8px;
+        }
+
+        .customer-detail-item strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state h3 {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            table th, table td {
+                padding: 10px;
+            }
+
+            .action-btn {
+                padding: 6px 10px;
+                font-size: 0.8em;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="header">
+            <div>
+                <h1>📊 Admin Dashboard</h1>
+                <p>Kelola customer data dan monitoring statistik</p>
+            </div>
+            <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="icon">👥</div>
+                <div class="label">Total Customers</div>
+                <div class="number" id="totalCustomers">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">📱</div>
+                <div class="label">Total Interactions</div>
+                <div class="number" id="totalInteractions">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">🔝</div>
+                <div class="label">Top Platform</div>
+                <div class="number" id="topPlatform">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">📈</div>
+                <div class="label">Avg. per Customer</div>
+                <div class="number" id="avgInteraction">-</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('customers')">👥 Customers</button>
+            <button class="tab-btn" onclick="switchTab('interactions')">📊 Interactions</button>
+            <button class="tab-btn" onclick="switchTab('analytics')">📈 Analytics</button>
+            <button class="tab-btn" onclick="switchTab('broadcast')">📢 Broadcast</button>
+        </div>
+
+        <!-- Customers Tab -->
+        <div id="customers-tab" class="tab-content active">
+            <div class="search-box">
+                <input type="text" id="customerSearch" placeholder="🔍 Cari nama/email/phone...">
+                <button onclick="searchCustomers()">Search</button>
+                <button onclick="refreshCustomers()" style="background: #4ecdc4;">🔄 Refresh</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Sumber</th>
+                        <th>Tanggal</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="customersTableBody">
+                    <tr><td colspan="6" class="empty-state">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Interactions Tab -->
+        <div id="interactions-tab" class="tab-content">
+            <div class="search-box">
+                <input type="text" id="platformFilter" placeholder="🔍 Filter platform...">
+                <button onclick="loadInteractions()">Filter</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Platform</th>
+                        <th>Action</th>
+                        <th>Konten</th>
+                        <th>Waktu</th>
+                    </tr>
+                </thead>
+                <tbody id="interactionsTableBody">
+                    <tr><td colspan="5" class="empty-state">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics-tab" class="tab-content">
+            <div class="chart-container">
+                <div class="char-title">📊 Customers by Source</div>
+                <div id="sourceChart" class="bar-chart"></div>
+            </div>
+
+            <div class="chart-container">
+                <div class="char-title">🔝 Top Platforms</div>
+                <div id="platformChart" class="bar-chart"></div>
+            </div>
+
+            <div class="chart-container">
+                <div class="char-title">🎯 Top Actions</div>
+                <div id="actionChart" class="bar-chart"></div>
+            </div>
+        </div>
+
+        <!-- Broadcast Tab -->
+        <div id="broadcast-tab" class="tab-content">
+            <h2>📢 Send Message to Customers</h2>
+            
+            <div style="margin: 20px 0;">
+                <label style="display: block; margin-bottom: 10px; font-weight: bold;">
+                    ✉️ Pilih Platform:
+                </label>
+                <select id="broadcastPlatform" style="width: 100%; padding: 10px; border: 2px solid #eee; border-radius: 8px; margin-bottom: 15px;">
+                    <option value="">Semua Platform</option>
+                    <option value="telegram">Telegram</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="facebook">Facebook</option>
+                </select>
+            </div>
+
+            <div>
+                <label style="display: block; margin-bottom: 10px; font-weight: bold;">
+                    💬 Pesan:
+                </label>
+                <textarea id="broadcastMessage" 
+                    placeholder="Ketik pesan di sini..." 
+                    style="width: 100%; height: 150px; padding: 12px; border: 2px solid #eee; border-radius: 8px; font-size: 1em; resize: none;"
+                ></textarea>
+            </div>
+
+            <button onclick="sendBroadcast()" 
+                style="margin-top: 15px; padding: 12px 25px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1em; width: 100%;">
+                🚀 Send Broadcast
+            </button>
+
+            <div id="broadcastStatus" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <!-- Customer Detail Modal -->
+    <div id="customerModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('customerModal')">&times;</button>
+            <h2 id="modalTitle">Customer Detail</h2>
+            <div id="modalBody" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        let allCustomers = [];
+        let allInteractions = [];
+
+        // Initialize
+        window.addEventListener('load', () => {
+            refreshCustomers();
+            loadStats();
+            loadInteractions();
+        });
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            event.target.classList.add('active');
+
+            // Load data for specific tabs
+            if (tabName === 'analytics') loadAnalytics();
+            if (tabName === 'interactions') loadInteractions();
+        }
+
+        // Load customers
+        async function refreshCustomers() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/customers`);
+                const data = await response.json();
+                allCustomers = data.data;
+                renderCustomersTable(allCustomers);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('customersTableBody').innerHTML = 
+                    '<tr><td colspan="6" class="empty-state">❌ Gagal memuat data</td></tr>';
+            }
+        }
+
+        // Render customers table
+        function renderCustomersTable(customers) {
+            const tbody = document.getElementById('customersTableBody');
+
+            if (customers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">📭 Tidak ada customer</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = customers.map(customer => `
+                <tr>
+                    <td><strong>${customer.nama}</strong></td>
+                    <td>${customer.email || '-'}</td>
+                    <td>${customer.phone}</td>
+                    <td><span class="badge badge-${customer.sumber}">${customer.sumber}</span></td>
+                    <td>${new Date(customer.registered_date).toLocaleDateString('id-ID')}</td>
+                    <td>
+                        <button class="action-btn view" onclick="viewCustomerDetail(${customer.id})">👁️ View</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Search customers
+        function searchCustomers() {
+            const query = document.getElementById('customerSearch').value.toLowerCase();
+            const filtered = allCustomers.filter(c => 
+                c.nama.toLowerCase().includes(query) ||
+                c.email.toLowerCase().includes(query) ||
+                c.phone.includes(query)
+            );
+            renderCustomersTable(filtered);
+        }
+
+        // View customer detail
+        async function viewCustomerDetail(customerId) {
+            try {
+                const response = await fetch(`${API_BASE}/admin/customers/${customerId}`);
+                const customer = await response.json();
+
+                let html = `
+                    <div class="customer-detail-item">
+                        <strong>👤 Nama</strong>
+                        ${customer.nama}
+                    </div>
+                    <div class="customer-detail-item">
+                        <strong>📧 Email</strong>
+                        ${customer.email || '-'}
+                    </div>
+                    <div class="customer-detail-item">
+                        <strong>📱 Phone</strong>
+                        ${customer.phone}
+                    </div>
+                    <div class="customer-detail-item">
+                        <strong>🌐 Sumber</strong>
+                        <span class="badge badge-${customer.sumber}">${customer.sumber}</span>
+                    </div>
+                    <div class="customer-detail-item">
+                        <strong>📅 Registered</strong>
+                        ${new Date(customer.registered_date).toLocaleString('id-ID')}
+                    </div>
+                    <div class="customer-detail-item">
+                        <strong>⏰ Last Activity</strong>
+                        ${new Date(customer.last_activity).toLocaleString('id-ID')}
+                    </div>
+                `;
+
+                if (customer.device_info) {
+                    html += `<div class="customer-detail-item"><strong>📱 Device Info</strong><pre>${JSON.stringify(customer.device_info, null, 2)}</pre></div>`;
+                }
+
+                if (customer.interactions && customer.interactions.length > 0) {
+                    html += `<div class="customer-detail-item"><strong>📊 Interactions (Last 10)</strong><pre>${JSON.stringify(customer.interactions.slice(0, 10), null, 2)}</pre></div>`;
+                }
+
+                document.getElementById('modalBody').innerHTML = html;
+                document.getElementById('customerModal').style.display = 'block';
+            } catch (error) {
+                alert('Error loading customer detail: ' + error);
+            }
+        }
+
+        // Load interactions
+        async function loadInteractions() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/customers`);
+                const data = await response.json();
+
+                // Simplified - dalam produksi perlu endpoint separatuntuk interactions
+                const tbody = document.getElementById('interactionsTableBody');
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">📊 Data loading...</td></tr>';
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Load stats
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/stats`);
+                const stats = await response.json();
+
+                document.getElementById('totalCustomers').textContent = stats.total_customers;
+                document.getElementById('totalInteractions').textContent = stats.total_interactions;
+                document.getElementById('topPlatform').textContent = 
+                    stats.top_platforms[0]?.platform.toUpperCase() || '-';
+                document.getElementById('avgInteraction').textContent = 
+                    stats.total_customers > 0 
+                        ? (stats.total_interactions / stats.total_customers).toFixed(1)
+                        : '0';
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Load analytics
+        async function loadAnalytics() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/stats`);
+                const stats = await response.json();
+
+                // Render customer source chart
+                const sourceChart = document.getElementById('sourceChart');
+                sourceChart.innerHTML = stats.customers_by_source.map(item => `
+                    <div class="bar" style="height: ${Math.max(30, (item.count / Math.max(...stats.customers_by_source.map(x => x.count))) * 200)}px;">
+                        <span>${item.count}</span>
+                        <div class="bar-label">${item.sumber}</div>
+                    </div>
+                `).join('');
+
+                // Render platform chart
+                const platformChart = document.getElementById('platformChart');
+                platformChart.innerHTML = stats.top_platforms.map(item => `
+                    <div class="bar" style="height: ${Math.max(30, (item.count / Math.max(...stats.top_platforms.map(x => x.count))) * 200)}px;">
+                        <span>${item.count}</span>
+                        <div class="bar-label">${item.platform}</div>
+                    </div>
+                `).join('');
+
+                // Render action chart
+                const actionChart = document.getElementById('actionChart');
+                actionChart.innerHTML = stats.top_actions.slice(0, 5).map(item => `
+                    <div class="bar" style="height: ${Math.max(30, (item.count / Math.max(...stats.top_actions.map(x => x.count))) * 200)}px;">
+                        <span>${item.count}</span>
+                        <div class="bar-label">${item.action}</div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+
+        // Send broadcast
+        async function sendBroadcast() {
+            const platform = document.getElementById('broadcastPlatform').value;
+            const message = document.getElementById('broadcastMessage').value;
+
+            if (!message) {
+                alert('Pesan tidak boleh kosong!');
+                return;
+            }
+
+            alert(`📢 Broadcast siap dikirim!\n\nPlatform: ${platform || 'Semua'}\nPesan: ${message}\n\n(Fitur ini memerlukan integrasi lebih lanjut)`);
+
+            document.getElementById('broadcastMessage').value = '';
+        }
+
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Yakin ingin logout?')) {
+                window.location.href = '/index.html';
+            }
+        }
+    </script>
+</body>
+</html>

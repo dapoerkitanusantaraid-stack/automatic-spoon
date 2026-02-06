@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - INSTAGRAM_USERNAME=${INSTAGRAM_USERNAME}
+      - INSTAGRAM_PASSWORD=${INSTAGRAM_PASSWORD}
+      - DATABASE_PATH=/data/data.db
+    volumes:
+      - ./data:/data
+      - .:/app
+    command: python -m uvicorn server.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add database UI
+  db-viewer:
+    image: coleifer/sqlite-web
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./data:/data
+    environment:
+      - SQLITE_DATABASE=/data/data.db
+    restart: unless-stopped
+
+volumes:
+  data:
+    driver: local
