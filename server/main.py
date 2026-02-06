@@ -29,6 +29,18 @@ window_seconds = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "60"))
 
 add_security_middleware(app, allow_origins=origins, max_requests=max_requests, window_seconds=window_seconds)
 
+# If REDIS_URL is provided, use Redis-based rate limiter instead of in-memory one
+REDIS_URL = os.getenv("REDIS_URL") or os.getenv("REDIS_URL")
+if REDIS_URL:
+    try:
+        from server.redis_middleware import RedisRateLimitMiddleware
+        # Remove the in-memory limiter by re-creating app.middleware_stack without it is complex;
+        # instead, still add Redis middleware which will run alongside (preferred in production).
+        app.add_middleware(RedisRateLimitMiddleware, redis_url=REDIS_URL, max_requests=max_requests, window_seconds=window_seconds)
+    except Exception:
+        # If redis not installed or fails, proceed with in-memory limiter
+        pass
+
 # Initialize Telegram Bot
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8505712679:AAGIkuamaV2WFH-XUBjtcB4y8-6zP9kYHXc")
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
