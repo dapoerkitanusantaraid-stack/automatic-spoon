@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# Termux-friendly Quickstart for Project Server (Android / Termux)
+# This script provides step-by-step commands and helpers for running the
+# project inside Termux on Android. It does NOT require Docker.
+
+set -euo pipefail
 
 # Color codes
 GREEN='\033[0;32m'
@@ -7,72 +12,74 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}======================================${NC}"
-echo -e "${BLUE}PROJECT SERVER v2.0 - QUICKSTART${NC}"
+echo -e "${BLUE}PROJECT SERVER v2.0 - TERMUX QUICKSTART${NC}"
 echo -e "${BLUE}======================================${NC}\n"
 
-echo -e "${YELLOW}📋 SETUP (5 MENIT):${NC}\n"
+echo -e "${YELLOW}📋 PREPARATION (Termux)${NC}\n"
 
-echo "1️⃣  Install dependencies:"
+echo "1️⃣  Install Termux packages (run in Termux):"
+echo -e "${GREEN}   pkg update && pkg upgrade -y${NC}"
+echo -e "${GREEN}   pkg install -y python git clang make openssl-tool libffi libcrypt-dev${NC}\n"
+
+echo "2️⃣  Grant storage permission (required for file access):"
+echo -e "${GREEN}   termux-setup-storage${NC}\n"
+
+echo -e "${YELLOW}📦 Python environment${NC}\n"
+echo "Recommended: create and activate a virtual environment to keep dependencies isolated."
+echo -e "${GREEN}   python -m venv .venv${NC}"
+echo -e "${GREEN}   source .venv/bin/activate${NC}\n"
+
+echo "3️⃣  Install Python dependencies"
+echo -e "${GREEN}   pip install --upgrade pip setuptools wheel${NC}"
 echo -e "${GREEN}   pip install -r requirements.txt${NC}\n"
 
-echo "2️⃣  Setup environment:"
+echo "Notes:"
+echo " - Some packages (cryptography, cffi) may need a C compiler (clang) and libffi headers installed via pkg."
+echo " - If a package fails to build, try: pkg install build-essential (or install clang and make) then retry."
+
+echo -e "${YELLOW}⚙️  Configure environment${NC}\n"
+echo "4️⃣  Copy example .env and edit (use a text editor like nano)"
 echo -e "${GREEN}   cp .env.example .env${NC}"
-echo -e "${GREEN}   # Edit .env dengan Telegram token Anda${NC}\n"
+echo -e "${GREEN}   nano .env${NC}\n"
 
-echo "3️⃣  Jalankan server:"
-echo -e "${GREEN}   python server/main.py${NC}\n"
+echo "Set at minimum these vars in .env for Termux testing:" 
+echo "  - TELEGRAM_TOKEN"
+echo "  - TELEGRAM_WEBHOOK_URL (if using webhooks) or leave empty to use polling mode"
 
-echo "4️⃣  (Optional) Load sample data:"
-echo -e "${GREEN}   python init_sample_data.py${NC}\n"
+echo -e "${YELLOW}▶️  Run the server (development)${NC}\n"
+echo "Use this command to start the FastAPI app with Uvicorn on Termux:" 
+echo -e "${GREEN}   source .venv/bin/activate && python -m uvicorn server.main:app --host 0.0.0.0 --port 8000 --reload${NC}\n"
 
-echo -e "${YELLOW}🎯 AKSES:${NC}\n"
-echo "  👤 Customer: http://localhost:8000/index.html"
-echo "  📊 Admin:    http://localhost:8000/admin-dashboard.html"
-echo "  🤖 API Docs: http://localhost:8000/docs"
-echo "  📱 Telegram: Message /start ke bot Anda\n"
+echo "If `uvicorn` is not installed as a module, run:"
+echo -e "${GREEN}   pip install uvicorn[standard]${NC}\n"
 
-echo -e "${YELLOW}📚 DOKUMENTASI:${NC}\n"
-echo "  • README.md        - Project overview"
-echo "  • SETUP_GUIDE.md   - Detailed setup & bot config"
-echo "  • DOKUMENTASI.md   - API reference"
-echo "  • examples.py      - Integration examples\n"
+echo -e "${YELLOW}🔗 Webhook testing (optional)${NC}\n"
+echo "If your device is not publicly reachable, use ngrok to expose the local port for webhooks."
+echo -e "${GREEN}   pkg install -y wget unzip${NC}"
+echo -e "${GREEN}   # download ngrok and run: ngrok http 8000${NC}\n"
 
-echo -e "${YELLOW}📁 FILE STRUCTURE:${NC}\n"
-echo "  server/"
-echo "    ├── main.py              # FastAPI + Telegram"
-echo "    ├── whatsapp_bot.py      # WhatsApp (Twilio)"
-echo "    └── social_media.py      # Instagram/Facebook"
-echo "  index.html                 # Customer frontend"
-echo "  admin-dashboard.html       # Admin panel"
-echo "  sdk.js                     # Mobile tracking SDK"
-echo "  requirements.txt           # Dependencies"
-echo "  .env.example               # Config template"
-echo "  Dockerfile                 # Docker setup"
-echo "  docker-compose.yml         # Docker Compose"
-echo "  examples.py                # Code examples\n"
+echo -e "${YELLOW}📱 Quick verification${NC}\n"
+echo "After starting the server, open:"
+echo -e "  • Customer UI : http://localhost:8000/index.html"
+echo -e "  • Admin UI    : http://localhost:8000/admin-dashboard.html"
+echo -e "  • API docs    : http://localhost:8000/docs\n"
 
-echo -e "${YELLOW}🔑 FEATURES:${NC}\n"
-echo "  ✅ Multi-platform: Telegram, WhatsApp, Instagram, Facebook, Web"
-echo "  ✅ Customer tracking: Collect device info & behavior data"
-echo "  ✅ Admin dashboard: Real-time analytics & customer management"
-echo "  ✅ Content management: Multiple categories & galleries"
-echo "  ✅ Broadcast system: Send to multiple platforms"
-echo "  ✅ Mobile SDK: Track web/mobile customer interactions"
-echo "  ✅ REST API: Fully documented endpoints\n"
+echo -e "${YELLOW}🛠️  Useful helper commands${NC}\n"
+echo -e "${GREEN}   # activate venv${NC}"
+echo -e "   source .venv/bin/activate"
+echo -e "${GREEN}   # run tests${NC}"
+echo -e "   pytest -q"
+echo -e "${GREEN}   # start server (background)${NC}"
+echo -e "   nohup python -m uvicorn server.main:app --host 0.0.0.0 --port 8000 > server.log 2>&1 &"
 
-echo -e "${YELLOW}🚀 QUICK COMMANDS:${NC}\n"
-echo -e "${GREEN}   ./deploy.sh setup${NC}     # Download & setup"
-echo -e "${GREEN}   ./deploy.sh dev${NC}       # Run development"
-echo -e "${GREEN}   ./deploy.sh test${NC}      # Test API"
-echo -e "${GREEN}   python examples.py${NC}    # Run examples\n"
+echo -e "${YELLOW}🧭 Deployment notes (Termux limitations)${NC}\n"
+echo " - Docker is not available in Termux; use a VPS or Railway for production deployment."
+echo " - Termux is suitable for development/testing on-device, not recommended for production."
 
-echo -e "${YELLOW}📞 NEXT STEPS:${NC}\n"
-echo "  1. Read SETUP_GUIDE.md for Telegram/WhatsApp setup"
-echo "  2. Get Telegram token from @BotFather"
-echo "  3. Configure .env with your credentials"
-echo "  4. Start server and test with sample data"
-echo "  5. Customize frontend & deploy to production\n"
+echo -e "${YELLOW}📚 References${NC}\n"
+echo "  • README.md and DEPLOYMENT.md for full production instructions"
+echo "  • Use ngrok to test webhooks from Telegram/Twilio when developing on-device"
 
 echo -e "${BLUE}======================================${NC}"
-echo -e "${GREEN}✅ Ready to start! Let's go! 🚀${NC}"
+echo -e "${GREEN}✅ Termux Quickstart ready — follow steps above to run on Android.${NC}"
 echo -e "${BLUE}======================================${NC}\n"
